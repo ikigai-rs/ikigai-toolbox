@@ -134,6 +134,9 @@ check("patches: each one applied", () => {
   // D1: values go in with $h only, never $r/$a.
   assert.doesNotMatch(template, /\$[ra]\{/, "0003: the template splices nothing unescaped")
   assert.doesNotMatch(template, /<script>|\sstyle=/, "no inline script or style (D6)")
+  // The crate's tests compose the template from tests/fixtures; it must be this build's.
+  const pinned = fs.readFileSync(path.join(root, "tests", "fixtures", "page.template.html"), "utf8")
+  assert.equal(template, pinned, "tests/fixtures/page.template.html is the built template (copy dist/'s over it)")
   return "0001-open-from, 0002-editor-link, 0003-page-template"
 })
 

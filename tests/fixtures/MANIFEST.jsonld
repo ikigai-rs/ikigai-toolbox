@@ -72,8 +72,8 @@
       "title": "page.template.html",
       "description": "toolbox.html (as patched) made an ikigai-fn compose template by patches/0003-page-template.patch: urn:toolbox:template:page",
       "mediaType": "text/html; charset=utf-8",
-      "sizeBytes": 3954,
-      "identifier": "sha256-0fedc5fece9c6368d304a4c1cf0165fbff882f1ab61d3a1624d0f0231190048d",
+      "sizeBytes": 3830,
+      "identifier": "sha256-9fc561a111dd6ffb0b2c1c5ab91f5d63649d207744c38ab5e2ac4188f5fcf3dd",
       "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
       "license": "https://spdx.org/licenses/MIT"
     },

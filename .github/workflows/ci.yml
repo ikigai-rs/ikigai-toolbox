@@ -10,3 +10,36 @@ jobs:
     uses: ikigai-rs/.github/.github/workflows/rust.yml@main
     with:
       wasm-lib: true
+  # The page as this repo serves it (non-cargo, so local to this file: field guide 9g).
+  # build.sh builds the engine from the pinned submodule with upstream's toolchain,
+  # copies and patches the page (a patch that no longer applies at the pin fails
+  # here), and writes the manifest; the smoke test then runs the engine in Node.
+  # Unconditional on purpose: a path filter is a gate that silently does not run (9c).
+  dist:
+    name: dist (build.sh + smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Pinned commit
+        id: pin
+        run: echo "commit=$(git -C vendor/turtle-lsp rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Upstream's toolchain (vendor/turtle-lsp/rust-toolchain.toml) plus wasm32
+        working-directory: vendor/turtle-lsp
+        run: |
+          rustup toolchain install
+          rustup target add wasm32-unknown-unknown
+          rustc --version
+      - name: Cache the engine build (keyed by the pinned commit)
+        uses: actions/cache@v4
+        with:
+          path: target/engine-*
+          key: engine-${{ runner.os }}-${{ steps.pin.outputs.commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: build.sh
+        run: ./build.sh
+      - name: Smoke test
+        run: node tests/smoke.mjs

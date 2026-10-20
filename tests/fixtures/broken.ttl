@@ -1,0 +1,6 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <https://example.org/> .
+
+ex:toolbox rdfs:label "The RDF Toolbox" ;
+    rdfs:comment "an unterminated statement"
+ex:other rdfs:label "next" .

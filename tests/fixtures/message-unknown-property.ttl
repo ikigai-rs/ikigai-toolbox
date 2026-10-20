@@ -1,0 +1,11 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ik: <https://ikigai-rs.dev/ns#> .
+
+<urn:layer:talk:entry:8> a ik:Message ;
+    ik:body "A post that says more than the layer allows." ;
+    prov:wasAttributedTo <urn:example:participant:brian> ;
+    dcterms:created "2026-10-19T18:01:00Z"^^xsd:dateTime ;
+    ik:seq 8 ;
+    dcterms:subject "not in the closed shape" .

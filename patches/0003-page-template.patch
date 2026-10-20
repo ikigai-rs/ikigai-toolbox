@@ -1,0 +1,28 @@
+diff --git a/page.template.html b/page.template.html
+--- a/page.template.html
++++ b/page.template.html
+@@ -1,17 +1,19 @@
+ <!doctype html>
+-<html lang="en">
++<html lang="en" data-theme="$h{{theme} || urn:toolbox:text:auto}">
+ <head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ <title>RDF Toolbox</title>
+ <meta name="description" content="Format, validate, SHACL-check and tidy SPARQL in your browser. turtle-lsp runs in this tab; nothing is uploaded.">
+ <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231d2330%22/%3E%3Ctext x=%2216%22 y=%2221%22 font-family=%22monospace%22 font-size=%2212%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22%3Ettl%3C/text%3E%3C/svg%3E">
+-<link rel="stylesheet" href="style.css">
+-<script type="module" src="app.js"></script>
++<link rel="stylesheet" href="/toolbox/style.css">
++<link rel="stylesheet" href="/toolbox/tokens.css">
++<link rel="alternate" type="text/plain" href="$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:text:/toolbox/page}">
++<script type="module" src="/toolbox/app.js"></script>
+ </head>
+-<body data-ready="false" data-busy="true">
++<body data-ready="false" data-busy="true" about="$h{{iri} || urn:toolbox:text:urn:toolbox:page}" data-inputs="[&quot;$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:none}&quot;,&quot;$h{urn:toolbox:text:/toolbox/input/{shapes} || urn:toolbox:none}&quot;]">
+ <header class="hd">
+-  <div class="brand"><span class="logo" aria-hidden="true">ttl</span><b>RDF Toolbox</b><span class="sub">built on turtle-lsp</span></div>
++  <div class="brand"><span class="logo" aria-hidden="true">ttl</span><b>RDF Toolbox</b><span class="sub">built on turtle-lsp</span><a class="checked" href="$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:text:/toolbox/page}">$h{{iri} || urn:toolbox:text:urn:toolbox:page}</a></div>
+   <div class="hd-end"><span class="priv">Runs in this tab. Nothing is uploaded.</span><a class="ed-link" href="https://abhishekkundu25.github.io/turtle-lsp/?editor" rel="noopener">Open the editor</a></div>
+ </header>
+ <nav class="tabs" id="tabs" role="tablist" aria-label="Tools"></nav>

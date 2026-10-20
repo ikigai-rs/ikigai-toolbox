@@ -1,0 +1,7 @@
+PREFIX ik: <https://ikigai-rs.dev/ns#>
+SELECT ?message ?body
+WHERE {
+  ?message a ik:Message ;
+           ik:body ?body
+  FILTER(STRLEN(?body) > 10
+}

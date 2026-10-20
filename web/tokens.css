@@ -1,0 +1,74 @@
+/* ikigai-toolbox: the RDF Toolbox on the ikigai token set (UI conventions D12).
+ *
+ * Loaded AFTER upstream's style.css. Two parts:
+ *
+ *  1. VALUES of the shared tokens. These are gonk.css's two palettes, copied
+ *     until the shared token stylesheet (a resource of its own, D12/D17) exists;
+ *     when it does, it replaces this part, and this file keeps only part 2.
+ *     The high-contrast palette D12 names comes with that stylesheet: it is a
+ *     seam here, not a third palette written for this page alone.
+ *  2. The MAPPING of upstream's custom properties onto the shared names, by
+ *     role. It stays when part 1 goes. Upstream's syntax and status colors
+ *     (--com, --str, --bad-*, --ok-*, --warn-*, ...) have no shared token and
+ *     stay upstream's.
+ *
+ * Selectors: upstream sets its variables on :root and, for dark, on
+ * :root:not([data-theme="light"]) and :root[data-theme="dark"], which weigh
+ * (0,2,0). Every rule here weighs the same and comes later, so it wins in each
+ * theme: `auto` (no data-theme, or data-theme="auto") follows the system,
+ * `light` and `dark` force it.
+ */
+
+/* 1. Values (gonk.css's palettes; replaced by the shared token stylesheet). */
+:root:is([data-theme], :not([data-theme])) {
+  --bg: #ffffff;
+  --surface: #f4f6f8;
+  --fg: #1b1f24;
+  --muted: #545d68;
+  --accent: #0b5cad;
+  --accent-fg: #ffffff;
+  --danger: #a8200d;
+  --danger-fg: #ffffff;
+  --ok: #19703a;
+  --line: #c9d1d9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --fg: #e6edf3;
+    --muted: #9ea8b3;
+    --accent: #6cb6ff;
+    --accent-fg: #0d1117;
+    --danger: #ff9b8f;
+    --danger-fg: #0d1117;
+    --ok: #5bd07a;
+    --line: #30363d;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --fg: #e6edf3;
+  --muted: #9ea8b3;
+  --accent: #6cb6ff;
+  --accent-fg: #0d1117;
+  --danger: #ff9b8f;
+  --danger-fg: #0d1117;
+  --ok: #5bd07a;
+  --line: #30363d;
+}
+
+/* 2. The mapping: upstream's name on the left, the shared token it plays. --bg,
+ * --muted and --line are already the shared names, so they need no line. */
+:root:is([data-theme], :not([data-theme])) {
+  --panel: var(--surface);
+  --panel-hd: var(--surface);
+  --tx: var(--fg);
+  --acc: var(--accent);
+  --on-acc: var(--accent-fg);
+}
+
+/* The checked resource's link in the header (the page template's .checked). */
+.checked { color: var(--accent); font-size: 13px; overflow-wrap: anywhere; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

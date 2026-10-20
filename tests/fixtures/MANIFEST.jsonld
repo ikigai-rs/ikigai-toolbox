@@ -1,0 +1,159 @@
+{
+  "@context": {
+    "dcterms": "http://purl.org/dc/terms/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "ik": "https://ikigai-rs.dev/ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "title": "dcterms:title",
+    "description": "dcterms:description",
+    "identifier": "dcterms:identifier",
+    "version": "dcterms:hasVersion",
+    "hasPart": {
+      "@id": "dcterms:hasPart",
+      "@type": "@id"
+    },
+    "license": {
+      "@id": "dcterms:license",
+      "@type": "@id"
+    },
+    "isVersionOf": {
+      "@id": "dcterms:isVersionOf",
+      "@type": "@id"
+    },
+    "wasDerivedFrom": {
+      "@id": "prov:wasDerivedFrom",
+      "@type": "@id"
+    },
+    "mediaType": "ik:mediaType",
+    "sizeBytes": {
+      "@id": "ik:sizeBytes",
+      "@type": "xsd:nonNegativeInteger"
+    }
+  },
+  "@graph": [
+    {
+      "@id": "urn:toolbox:manifest",
+      "title": "The RDF Toolbox as ikigai-toolbox serves it",
+      "description": "turtle-lsp v0.5.2 (dcfeed02885c012ad5b7d1c28f33151eda8d75f8), built and patched by ikigai-toolbox's build.sh",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "hasPart": [
+        "urn:toolbox:toolbox.html",
+        "urn:toolbox:page.template.html",
+        "urn:toolbox:app.js",
+        "urn:toolbox:samples.js",
+        "urn:toolbox:worker.js",
+        "urn:toolbox:engine.js",
+        "urn:toolbox:style.css",
+        "urn:toolbox:tokens.css",
+        "urn:toolbox:engine.wasm",
+        "urn:toolbox:LICENSE.turtle-lsp"
+      ]
+    },
+    {
+      "@id": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "title": "turtle-lsp v0.5.2",
+      "identifier": "dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "version": "v0.5.2",
+      "isVersionOf": "https://github.com/abhishekkundu25/turtle-lsp",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:toolbox.html",
+      "title": "toolbox.html",
+      "description": "upstream web/app/toolbox.html with patches/0002-editor-link.patch",
+      "mediaType": "text/html; charset=utf-8",
+      "sizeBytes": 3337,
+      "identifier": "sha256-3032ebd364535d03ed0d0b65f1ddeb51cd13fa238d42fc3160fb3da32a930924",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:page.template.html",
+      "title": "page.template.html",
+      "description": "toolbox.html (as patched) made an ikigai-fn compose template by patches/0003-page-template.patch: urn:toolbox:template:page",
+      "mediaType": "text/html; charset=utf-8",
+      "sizeBytes": 3954,
+      "identifier": "sha256-0fedc5fece9c6368d304a4c1cf0165fbff882f1ab61d3a1624d0f0231190048d",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:app.js",
+      "title": "app.js",
+      "description": "upstream web/app/app.js with patches/0001-open-from.patch",
+      "mediaType": "text/javascript",
+      "sizeBytes": 29586,
+      "identifier": "sha256-43384862c416b4b8ec411ac140eed69b5da9f6349b22a768eb844e29a94c4334",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:samples.js",
+      "title": "samples.js",
+      "description": "upstream web/app/samples.js",
+      "mediaType": "text/javascript",
+      "sizeBytes": 6487,
+      "identifier": "sha256-1652dffb8e4698ebee2fe3c932e5884e986b3e7a1479c80cbf1bf7670206e3ce",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:worker.js",
+      "title": "worker.js",
+      "description": "upstream web/app/worker.js",
+      "mediaType": "text/javascript",
+      "sizeBytes": 719,
+      "identifier": "sha256-88ca7488d62ec363cf6c2c9ec2e726313b3a19be14f9004a8a3614fcfff5b914",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:engine.js",
+      "title": "engine.js",
+      "description": "upstream web/app/engine.js",
+      "mediaType": "text/javascript",
+      "sizeBytes": 2298,
+      "identifier": "sha256-5a50e8262278db63421da5ead5554cf6aad92d50c403ccf473f9877941fbcc83",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:style.css",
+      "title": "style.css",
+      "description": "upstream web/app/style.css",
+      "mediaType": "text/css",
+      "sizeBytes": 10782,
+      "identifier": "sha256-3411e6fd668bf7d9debe54a9b7e71bd30498f3365657277abab23a20ce582bda",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:tokens.css",
+      "title": "tokens.css",
+      "description": "ikigai-toolbox's own: upstream's custom properties mapped onto the shared token names (web/tokens.css)",
+      "mediaType": "text/css",
+      "sizeBytes": 2546,
+      "identifier": "sha256-9415918ae274b37663fbd9936f384e3abc52b0df11d6c36d49f85c8415e6a4ad"
+    },
+    {
+      "@id": "urn:toolbox:engine.wasm",
+      "title": "engine.wasm",
+      "description": "upstream web/engine built for wasm32-unknown-unknown by build.sh (cargo build --release --locked)",
+      "mediaType": "application/wasm",
+      "sizeBytes": 8337803,
+      "identifier": "sha256-8528bf498ea5a904e7b4c1ac944a242a0db1bcbd7ddea8117f76b03f886a8bf3",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    },
+    {
+      "@id": "urn:toolbox:LICENSE.turtle-lsp",
+      "title": "LICENSE.turtle-lsp",
+      "description": "upstream LICENSE: the copyright and permission notice every copy carries",
+      "mediaType": "text/plain; charset=utf-8",
+      "sizeBytes": 1071,
+      "identifier": "sha256-b3a3376679111825f2720b499cd45c89ead8733b049d9e818e9fe26680bd3e03",
+      "wasDerivedFrom": "https://github.com/abhishekkundu25/turtle-lsp/commit/dcfeed02885c012ad5b7d1c28f33151eda8d75f8",
+      "license": "https://spdx.org/licenses/MIT"
+    }
+  ]
+}

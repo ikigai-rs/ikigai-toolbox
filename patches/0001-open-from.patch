@@ -1,0 +1,60 @@
+diff --git a/app.js b/app.js
+--- a/app.js
++++ b/app.js
+@@ -528,6 +528,50 @@ async function dropped(items) {
+   return out
+ }
+ 
++// ikigai-toolbox: the input the page names. Each `?from=<path>` (it may repeat)
++// and each entry of the body's `data-inputs` (a JSON array a host's template
++// sets) must be a same-origin, path-absolute reference: it starts with "/" and
++// not "//", and resolves to this page's origin. Anything else is refused with a
++// note and never fetched. Each one is fetched with the page's own credentials and
++// added as a file named by its last path segment; an empty entry is skipped and a
++// repeated one is read once. True when the page named any input, so the sample
++// set is loaded only when it named none.
++function openFrom() {
++  let named = new URLSearchParams(location.search).getAll("from")
++  try {
++    const listed = JSON.parse(document.body.dataset.inputs || "[]")
++    named = named.concat(Array.isArray(listed) ? listed : [])
++  } catch {
++    notify("The page's input list (data-inputs) is not JSON, so it was not read.")
++  }
++  named = [...new Set(named)].filter((p) => p !== "")
++  if (!named.length) return false
++  const ok = (p) =>
++    typeof p === "string" && p.startsWith("/") && !p.startsWith("//") && new URL(p, location.href).origin === location.origin
++  const refused = named.filter((p) => !ok(p))
++  if (refused.length) notify(`Not opened, as only same-origin paths are read: ${refused.map(String).join(", ")}`)
++  const segment = (p) => {
++    const last = new URL(p, location.href).pathname.split("/").pop()
++    try {
++      return decodeURIComponent(last) || p
++    } catch {
++      return last || p
++    }
++  }
++  Promise.allSettled(
++    named.filter(ok).map(async (p) => {
++      const r = await fetch(p, { credentials: "same-origin" })
++      if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`)
++      return { name: segment(p), text: await r.text() }
++    }),
++  ).then((results) => {
++    const failed = results.filter((r) => r.status === "rejected").map((r) => r.reason.message)
++    if (failed.length) notify(`Could not open ${failed.join(", ")}`)
++    addFiles(results.filter((r) => r.status === "fulfilled").map((r) => r.value))
++  })
++  return true
++}
++
+ // ---- wiring ---------------------------------------------------------------------------
+ 
+ function wire() {
+@@ -627,4 +671,4 @@ function wire() {
+ 
+ wire()
+ ask("version").then(({ ok }) => ($("version").textContent = `turtle-lsp ${ok.version}`), () => {})
+-loadSample("starter")
++if (!openFrom()) loadSample("starter")

@@ -1,0 +1,3 @@
+[submodule "vendor/turtle-lsp"]
+	path = vendor/turtle-lsp
+	url = https://github.com/abhishekkundu25/turtle-lsp

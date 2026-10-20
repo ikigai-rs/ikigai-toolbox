@@ -31,6 +31,15 @@ jobs:
           rustup toolchain install
           rustup target add wasm32-unknown-unknown
           rustc --version
+      # A fresh checkout stamps every file with the current time, so cargo would see
+      # the two path crates (turtle-lsp, web/engine) as changed and rebuild them, and
+      # those two are nearly all of the build. The cache is keyed by the commit, so the
+      # sources ARE the cached ones: give them the commit's own time, which predates
+      # every cached fingerprint, and cargo finds them fresh.
+      - name: Source times from the pinned commit
+        run: |
+          when="$(git -C vendor/turtle-lsp log -1 --format=%ct)"
+          git -C vendor/turtle-lsp ls-files -z | (cd vendor/turtle-lsp && xargs -0 touch -h -d "@$when")
       - name: Cache the engine build (keyed by the pinned commit)
         uses: actions/cache@v4
         with:

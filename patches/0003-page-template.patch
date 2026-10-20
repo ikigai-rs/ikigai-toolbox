@@ -1,7 +1,7 @@
 diff --git a/page.template.html b/page.template.html
 --- a/page.template.html
 +++ b/page.template.html
-@@ -1,17 +1,19 @@
+@@ -1,17 +1,18 @@
  <!doctype html>
 -<html lang="en">
 +<html lang="en" data-theme="$h{{theme} || urn:toolbox:text:auto}">
@@ -15,7 +15,6 @@ diff --git a/page.template.html b/page.template.html
 -<script type="module" src="app.js"></script>
 +<link rel="stylesheet" href="/toolbox/style.css">
 +<link rel="stylesheet" href="/toolbox/tokens.css">
-+<link rel="alternate" type="text/plain" href="$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:text:/toolbox/page}">
 +<script type="module" src="/toolbox/app.js"></script>
  </head>
 -<body data-ready="false" data-busy="true">

@@ -1,0 +1,14 @@
+diff --git a/toolbox.html b/toolbox.html
+--- a/toolbox.html
++++ b/toolbox.html
+@@ -26,8 +26,8 @@
+       <button class="ibtn" id="open">Open files</button>
+       <button class="ibtn" id="open-folder">Open folder</button>
+       <button class="ibtn" id="download">Download</button>
+-      <input type="file" id="picker" class="hidden-input" multiple accept=".ttl,.turtle,.trig,.nt,.nq,.rq,.sparql,.ru" tabindex="-1">
+-      <input type="file" id="folder-picker" class="hidden-input" webkitdirectory multiple tabindex="-1">
++      <input type="file" id="picker" class="hidden-input" aria-label="Files to open" multiple accept=".ttl,.turtle,.trig,.nt,.nq,.rq,.sparql,.ru" tabindex="-1">
++      <input type="file" id="folder-picker" class="hidden-input" aria-label="A folder to open" webkitdirectory multiple tabindex="-1">
+       <span class="ihint">or drop files or a folder here</span>
+     </div>
+     <div id="paste-box" class="paste" hidden>

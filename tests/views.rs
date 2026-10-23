@@ -41,11 +41,11 @@ fn the_check_page_snapshot() {
     );
     snapshot("check.html", &html);
     assert!(html.contains(r#"data-theme="dark""#));
-    // RDFa: the page is about the resource it checks, and links to it.
+    // RDFa: the page is about the resource it checks, and names it as text: a link to
+    // the input's path would be one a static host cannot serve (ledger #2106).
     assert!(html.contains(r#"about="urn:example:data""#));
-    assert!(html.contains(
-        r#"<a class="checked" href="/toolbox/input/urn%3Aexample%3Adata">urn:example:data</a>"#
-    ));
+    assert!(html.contains(r#"<span class="checked">urn:example:data</span>"#));
+    assert!(!html.contains(r#"href="/toolbox/input/"#), "{html}");
     // The inputs: same-origin, path-absolute, one percent-encoded segment each.
     assert!(html.contains(
         r#"data-inputs="[&quot;/toolbox/input/urn%3Aexample%3Adata&quot;,&quot;/toolbox/input/urn%3Aexample%3Ashapes&quot;]""#
@@ -86,7 +86,7 @@ fn a_hostile_iri_comes_out_escaped_and_encoded() {
         html.contains(r#"about="urn:example:a&#39;b&amp;c/../d?e=f""#),
         "{html}"
     );
-    assert!(html.contains(">urn:example:a&#39;b&amp;c/../d?e=f</a>"));
+    assert!(html.contains(">urn:example:a&#39;b&amp;c/../d?e=f</span>"));
     assert!(html.contains("/toolbox/input/urn%3Aexample%3Aa%27b%26c%2F..%2Fd%3Fe%3Df"));
     assert!(
         html.contains("/toolbox/input/urn%3Ax%3A%22%27%3E%3C"),
@@ -125,5 +125,92 @@ fn an_input_that_is_not_an_absolute_iri_is_refused() {
     match Host::new().source("urn:toolbox:input:no-scheme") {
         Err(Error::InvalidArgument { name, .. }) => assert_eq!(name, "iri"),
         other => panic!("expected InvalidArgument on `iri`, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_check_page_does_not_link_the_sample_editor() {
+    // Upstream's hosted editor opens its own sample, not the resource checked here, and
+    // nothing checked here may go to it: a check page has no link to it (ledger #2106).
+    let host = Host::new();
+    for (name, args) in [
+        (
+            "urn:toolbox:check:urn:example:data",
+            &[("shapes", "urn:example:shapes")][..],
+        ),
+        ("urn:toolbox:page", &[][..]),
+    ] {
+        let html = host.text(name, args);
+        assert!(!html.contains("ed-link"), "{name}: {html}");
+        assert!(
+            !html.contains("https://"),
+            "{name} links off the host: {html}"
+        );
+    }
+}
+
+#[test]
+fn the_file_inputs_are_named() {
+    let html = Host::new().text("urn:toolbox:check:urn:example:data", &[]);
+    assert!(html.contains(r#"id="picker" class="hidden-input" aria-label="Files to open""#));
+    assert!(
+        html.contains(r#"id="folder-picker" class="hidden-input" aria-label="A folder to open""#)
+    );
+}
+
+#[test]
+fn base_puts_every_path_under_the_hosts_prefix() {
+    // A host serving the family below a prefix (a static site under a project path)
+    // passes it as base=, and the page names its assets and inputs under it.
+    let base = "/ikigai-tutorial/toolbox/";
+    let html = Host::new().text(
+        "urn:toolbox:check:urn:example:data",
+        &[("shapes", "urn:example:shapes"), ("base", base)],
+    );
+    for path in ["style.css", "tokens.css", "app.js"] {
+        assert!(
+            html.contains(&format!(r#"="{base}{path}""#)),
+            "{path}: {html}"
+        );
+    }
+    assert!(html.contains(&format!(
+        r#"data-inputs="[&quot;{base}input/urn%3Aexample%3Adata&quot;,&quot;{base}input/urn%3Aexample%3Ashapes&quot;]""#
+    )));
+    assert!(
+        !html.contains(r#""/toolbox/"#),
+        "a path outside the base: {html}"
+    );
+    // The empty page takes it too, and still names no input.
+    let page = Host::new().text("urn:toolbox:page", &[("base", base)]);
+    assert!(
+        page.contains(&format!(r#"href="{base}style.css""#)),
+        "{page}"
+    );
+    assert!(page.contains(r#"data-inputs="[&quot;&quot;,&quot;&quot;]""#));
+}
+
+#[test]
+fn a_base_that_is_not_a_same_origin_path_is_refused() {
+    let host = Host::new();
+    for bad in [
+        "//evil.example/",
+        "/\\evil.example/",
+        "https://evil.example/",
+        "javascript:alert(1)//",
+        "toolbox/",
+        "/toolbox",
+        "/a b/",
+        "/a\"b/",
+        "/a?b/",
+        "",
+    ] {
+        for name in ["urn:toolbox:page", "urn:toolbox:check:urn:example:data"] {
+            match host.source_with(name, &[("base", bad)], &Capability::root()) {
+                Err(Error::InvalidArgument { name: arg, .. }) => assert_eq!(arg, "base", "{bad:?}"),
+                other => {
+                    panic!("{name} with base={bad:?}: expected InvalidArgument, got {other:?}")
+                }
+            }
+        }
     }
 }

@@ -31,9 +31,10 @@ This crate, the build script, the patches and `web/tokens.css` are `MIT OR Apach
 | `urn:toolbox:{name}` | a built file, from a fixed allowlist (`FILES`) | the host's build directory, relabeled with the type the name fixes |
 | `urn:toolbox:manifest` | what the build holds and where it came from (JSON-LD) | alias of `urn:toolbox:MANIFEST.jsonld` |
 | `urn:toolbox:template:page` | the page as an ikigai-fn compose template | alias of `urn:toolbox:page.template.html` |
-| `urn:toolbox:page` | the empty toolbox (`theme=`) | `composeOver` the template |
-| `urn:toolbox:check:{iri}` | the toolbox checking one resource (`shapes=`, `theme=`) | `composeOver` the template |
+| `urn:toolbox:page` | the empty toolbox (`theme=`, `base=`) | `composeOver` the template |
+| `urn:toolbox:check:{iri}` | the toolbox checking one resource (`shapes=`, `theme=`, `base=`) | `composeOver` the template |
 | `urn:toolbox:input:{iri}` | a resource's Turtle face, as text for the page | the resource read with `as=text/turtle` under the caller's capability, transrepted if it answers another RDF syntax |
+| `urn:toolbox:path:{rest}` | the template's paths: `rest` under `base=` | one line of code: a template marker cannot join two values |
 | `urn:toolbox:text:{text}`, `urn:toolbox:none` | the template's helpers: a value as text, and nothing | ikigai-fn's `echo`, and one constant |
 
 The allowlist is the page (`toolbox.html`, `app.js`, `samples.js`, `worker.js`, `engine.js`,
@@ -88,13 +89,21 @@ simple choice, and at that cost it is the recommended one.
 ## The page over a host's own resources
 
 - **`/toolbox/check/{iri}`** is `urn:toolbox:check:{iri}`: the template composed with the
-  resource's IRI. The page's `<body>` carries RDFa `about="{iri}"`, and the header links to the
-  resource's text face. `shapes=` adds a second input, so the SHACL tab checks the resource
-  against those shapes. `theme=` (`auto`, `light`, `dark`) sets `data-theme` on `<html>`. Every
-  value goes into the template with `$h`, which escapes it, and a value spliced into a path is
-  percent-encoded as one segment.
+  resource's IRI. The page's `<body>` carries RDFa `about="{iri}"`, and the header names the
+  resource as text (a link to its input path would be one a static host cannot serve; the
+  page's Download button saves what it read). `shapes=` adds a second input, so the SHACL tab
+  checks the resource against those shapes. `theme=` (`auto`, `light`, `dark`) sets
+  `data-theme` on `<html>`. Every value goes into the template with `$h`, which escapes it, and
+  a value spliced into a path is percent-encoded as one segment. A check page has no link to
+  the hosted editor: that editor opens upstream's sample, not the resource being checked.
+- **`base=`** is the path the host serves the family under, `/toolbox/` by default. The page
+  names its stylesheets, its script and its inputs below it (`{base}style.css`,
+  `{base}input/{iri}`), so a host under a prefix (a static site at `/my-project/toolbox/`)
+  passes `base=/my-project/toolbox/` and rewrites nothing. It must be path-absolute (`/`, not
+  `//`), end in `/`, and hold only URI path characters; anything else is `InvalidArgument`.
 - **`/toolbox/toolbox.html?from=/a.ttl&from=/a.shapes.ttl#shacl`** is the static page fetching
-  same-origin paths. The fragment still picks the tool.
+  same-origin paths. The fragment still picks the tool. A page opened on inputs drops its link
+  to the sample editor, for the check page's reason.
 
 Either way the page reads its inputs with the patched `app.js`. An input must start with `/`, must
 not start with `//`, and must resolve to the page's own origin. Anything else gets a visible note
@@ -127,17 +136,22 @@ Each patch is a diff against the pinned file, applied to the copy in `dist/`:
 - **`0001-open-from.patch`** lets `app.js` open its input from the page: `?from=` (repeatable) and
   the body's `data-inputs` (a JSON array the template sets). It adds one function and its call.
   Upstream's page reads only files the viewer picks, drops or pastes.
-- **`0002-editor-link.patch`** points "Open the editor" at upstream's hosted editor, because we do
-  not vendor Monaco.
-- **`0003-page-template.patch`** makes a copy of the patched `toolbox.html` into
+  When the page names an input, `app.js` also removes the sample editor link.
+- **`0002-editor-link.patch`** points the editor link at upstream's hosted editor, labeled "Open
+  the sample editor", because we do not vendor Monaco and upstream's editor cannot open the
+  page's inputs. It opens upstream's sample; nothing on the page is sent to it.
+- **`0003-input-names.patch`** names the two hidden file inputs the Open buttons click ("Files to
+  open", "A folder to open"), which upstream leaves unnamed (WCAG 4.1.2).
+- **`0004-page-template.patch`** makes a copy of the patched `toolbox.html` into
   `page.template.html`, the compose template behind `urn:toolbox:page` and
-  `urn:toolbox:check:{iri}`. The template takes the theme, the self-description and the inputs,
-  and references its assets at absolute `/toolbox/…` paths, because a check page lives below
-  `/toolbox/check/`.
+  `urn:toolbox:check:{iri}`. The template takes the theme, the self-description, the inputs and
+  the base, references its assets at absolute paths under `base=` (because a check page lives
+  below `{base}check/`), names the checked IRI as text, and drops the editor link.
 
-`web/tokens.css` is ours. It maps upstream's custom properties (`--panel`, `--tx`, `--acc`,
-`--on-acc`) onto the ikigai token names (`--surface`, `--fg`, `--accent`, `--accent-fg`) and is
-loaded after upstream's stylesheet. Its palette values are gonk's for now. The shared token
+`web/tokens.css` is ours. It maps upstream's custom properties (`--panel`, `--tx`, `--faint`,
+`--acc`, `--on-acc`) onto the ikigai token names (`--surface`, `--fg`, `--muted`, `--accent`,
+`--accent-fg`) and is loaded after upstream's stylesheet. Upstream's own `--faint` is 2.35:1 on
+the light surface and 3.73:1 on the dark one, so it plays `--muted` (6.17:1 and 7.17:1). Its palette values are gonk's for now. The shared token
 stylesheet will replace them, and the mapping will stay.
 
 ### Moving the pin
@@ -168,7 +182,8 @@ built directory behind a feature of its own and bind it at `DIST`, and the names
   unlisted name: `NotFound` with no sub-request), NotFound passthrough, and the manifest's Turtle
   face (through ikigai-rdf's transreptor).
 - `tests/views.rs`: snapshots of the page and a check page, a hostile `theme=` and a hostile IRI
-  escaped, and an input refused to a caller who cannot read it.
+  escaped, `base=` honored and a non-path `base=` refused, no editor link on a composed page,
+  named file inputs, and an input refused to a caller who cannot read it.
 - `tests/host.rs`: the mount above, with ikigai-fs over a real directory.
 
 ## License

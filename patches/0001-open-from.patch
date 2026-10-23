@@ -1,7 +1,7 @@
 diff --git a/app.js b/app.js
 --- a/app.js
 +++ b/app.js
-@@ -528,6 +528,50 @@ async function dropped(items) {
+@@ -528,6 +528,53 @@ async function dropped(items) {
    return out
  }
  
@@ -12,7 +12,9 @@ diff --git a/app.js b/app.js
 +// note and never fetched. Each one is fetched with the page's own credentials and
 +// added as a file named by its last path segment; an empty entry is skipped and a
 +// repeated one is read once. True when the page named any input, so the sample
-+// set is loaded only when it named none.
++// set is loaded only when it named none. A page that names its input is checking
++// that input, so the header's link to the hosted sample editor goes: that editor
++// opens upstream's sample, not this input, and nothing here is sent to it.
 +function openFrom() {
 +  let named = new URLSearchParams(location.search).getAll("from")
 +  try {
@@ -23,6 +25,7 @@ diff --git a/app.js b/app.js
 +  }
 +  named = [...new Set(named)].filter((p) => p !== "")
 +  if (!named.length) return false
++  document.querySelector(".ed-link")?.remove()
 +  const ok = (p) =>
 +    typeof p === "string" && p.startsWith("/") && !p.startsWith("//") && new URL(p, location.href).origin === location.origin
 +  const refused = named.filter((p) => !ok(p))
@@ -52,7 +55,7 @@ diff --git a/app.js b/app.js
  // ---- wiring ---------------------------------------------------------------------------
  
  function wire() {
-@@ -627,4 +671,4 @@ function wire() {
+@@ -627,4 +674,4 @@ function wire() {
  
  wire()
  ask("version").then(({ ok }) => ($("version").textContent = `turtle-lsp ${ok.version}`), () => {})

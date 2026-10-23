@@ -58,12 +58,13 @@ cp "$SUB/LICENSE" "$DIST/LICENSE.turtle-lsp"
 cp "$ROOT/web/tokens.css" "$DIST/tokens.css"
 
 # 4. The patches, in order, onto the copies. The page template is made from the
-# patched toolbox.html, so it carries 0001/0002 before 0003 makes it a template.
+# patched toolbox.html, so it carries 0001-0003 before 0004 makes it a template.
 apply() { git -C "$ROOT" apply --directory=dist --whitespace=error "$1" || die "$(basename "$1") does not apply at $TAG"; }
 apply "$ROOT/patches/0001-open-from.patch"
 apply "$ROOT/patches/0002-editor-link.patch"
+apply "$ROOT/patches/0003-input-names.patch"
 cp "$DIST/toolbox.html" "$DIST/page.template.html"
-apply "$ROOT/patches/0003-page-template.patch"
+apply "$ROOT/patches/0004-page-template.patch"
 
 # 5. The manifest.
 node "$ROOT/tools/manifest.mjs" "$DIST" "$UPSTREAM" "$TAG" "$COMMIT"

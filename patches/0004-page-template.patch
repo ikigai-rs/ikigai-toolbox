@@ -1,7 +1,7 @@
 diff --git a/page.template.html b/page.template.html
 --- a/page.template.html
 +++ b/page.template.html
-@@ -1,17 +1,18 @@
+@@ -1,18 +1,19 @@
  <!doctype html>
 -<html lang="en">
 +<html lang="en" data-theme="$h{{theme} || urn:toolbox:text:auto}">
@@ -13,15 +13,17 @@ diff --git a/page.template.html b/page.template.html
  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%231d2330%22/%3E%3Ctext x=%2216%22 y=%2221%22 font-family=%22monospace%22 font-size=%2212%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22%3Ettl%3C/text%3E%3C/svg%3E">
 -<link rel="stylesheet" href="style.css">
 -<script type="module" src="app.js"></script>
-+<link rel="stylesheet" href="/toolbox/style.css">
-+<link rel="stylesheet" href="/toolbox/tokens.css">
-+<script type="module" src="/toolbox/app.js"></script>
++<link rel="stylesheet" href="$h{urn:toolbox:path:style.css?base={base}}">
++<link rel="stylesheet" href="$h{urn:toolbox:path:tokens.css?base={base}}">
++<script type="module" src="$h{urn:toolbox:path:app.js?base={base}}"></script>
  </head>
 -<body data-ready="false" data-busy="true">
-+<body data-ready="false" data-busy="true" about="$h{{iri} || urn:toolbox:text:urn:toolbox:page}" data-inputs="[&quot;$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:none}&quot;,&quot;$h{urn:toolbox:text:/toolbox/input/{shapes} || urn:toolbox:none}&quot;]">
++<body data-ready="false" data-busy="true" about="$h{{iri} || urn:toolbox:text:urn:toolbox:page}" data-inputs="[&quot;$h{urn:toolbox:path:input/{iri}?base={base} || urn:toolbox:none}&quot;,&quot;$h{urn:toolbox:path:input/{shapes}?base={base} || urn:toolbox:none}&quot;]">
  <header class="hd">
 -  <div class="brand"><span class="logo" aria-hidden="true">ttl</span><b>RDF Toolbox</b><span class="sub">built on turtle-lsp</span></div>
-+  <div class="brand"><span class="logo" aria-hidden="true">ttl</span><b>RDF Toolbox</b><span class="sub">built on turtle-lsp</span><a class="checked" href="$h{urn:toolbox:text:/toolbox/input/{iri} || urn:toolbox:text:/toolbox/page}">$h{{iri} || urn:toolbox:text:urn:toolbox:page}</a></div>
-   <div class="hd-end"><span class="priv">Runs in this tab. Nothing is uploaded.</span><a class="ed-link" href="https://abhishekkundu25.github.io/turtle-lsp/?editor" rel="noopener">Open the editor</a></div>
+-  <div class="hd-end"><span class="priv">Runs in this tab. Nothing is uploaded.</span><a class="ed-link" href="https://abhishekkundu25.github.io/turtle-lsp/?editor" rel="noopener">Open the sample editor</a></div>
++  <div class="brand"><span class="logo" aria-hidden="true">ttl</span><b>RDF Toolbox</b><span class="sub">built on turtle-lsp</span><span class="checked">$h{{iri} || urn:toolbox:text:urn:toolbox:page}</span></div>
++  <div class="hd-end"><span class="priv">Runs in this tab. Nothing is uploaded.</span></div>
  </header>
  <nav class="tabs" id="tabs" role="tablist" aria-label="Tools"></nav>
+ <p class="note" id="note" hidden>The SHACL tab appears when the input has shapes.</p>

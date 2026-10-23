@@ -21,11 +21,14 @@
 //! | `urn:toolbox:page` | the empty toolbox: the template composed with no inputs |
 //! | `urn:toolbox:check:{iri}` | the toolbox checking one resource, with an optional `shapes=` IRI |
 //! | `urn:toolbox:input:{iri}` | a resource's Turtle face as text, read under the caller's capability |
+//! | `urn:toolbox:path:{rest}` | the template's paths: `rest` under the `base=` the page is served from |
 //! | `urn:toolbox:text:{text}`, `urn:toolbox:none` | the template's two helpers: a value as text, and nothing |
 //!
 //! A host routes `/toolbox/{…}` to these by the mechanical rule (path segments joined
 //! by `:`), with [`TOOLBOX_CSP`] on the route: `/toolbox/toolbox.html`,
-//! `/toolbox/check/{iri}?shapes={iri}`, `/toolbox/input/{iri}`.
+//! `/toolbox/check/{iri}?shapes={iri}`, `/toolbox/input/{iri}`. A host that serves the
+//! family under another prefix passes it to the views as `base=` ([`DEFAULT_BASE`] is
+//! `/toolbox/`), and the composed page names its assets and inputs under it.
 //!
 //! ## Code, and what is composed
 //!
@@ -35,7 +38,8 @@
 //! served as text for the page to fetch). The views are ikigai-fn `composeOver` over
 //! the template; the aliases are core's `AliasTable`; `urn:toolbox:text:{text}` is
 //! ikigai-fn's `echo`. The one constant is `urn:toolbox:none`, the empty text a
-//! template fallback needs.
+//! template fallback needs, and `urn:toolbox:path:{rest}` joins a path to the base,
+//! which a template marker cannot.
 
 #![forbid(unsafe_code)]
 
@@ -126,6 +130,60 @@ pub fn media_type(name: &str) -> Option<&'static str> {
 
 /// The template the views compose: `urn:toolbox:template:page`.
 pub const TEMPLATE: &str = "urn:toolbox:template:page";
+
+/// The path a host serves the family under, when a view is given no `base=`:
+/// `/toolbox/`, the prefix of the mechanical route.
+pub const DEFAULT_BASE: &str = "/toolbox/";
+
+/// Whether `base` can prefix the page's paths: path-absolute (it starts with `/` and
+/// not `//`), ends with `/`, and holds only the characters of a URI path (RFC 3986
+/// `pchar` and `/`), so no backslash, space, quote, query or fragment. Anything that
+/// passes stays a same-origin path whatever is appended to it.
+///
+/// ```
+/// assert!(ikigai_toolbox::is_base("/toolbox/"));
+/// assert!(ikigai_toolbox::is_base("/ikigai-tutorial/toolbox/"));
+/// assert!(!ikigai_toolbox::is_base("//evil.example/"));
+/// assert!(!ikigai_toolbox::is_base("/\\evil.example/"));
+/// assert!(!ikigai_toolbox::is_base("javascript:alert(1)//"));
+/// assert!(!ikigai_toolbox::is_base("/toolbox"));
+/// ```
+pub fn is_base(base: &str) -> bool {
+    let pchar = |c: char| c.is_ascii_alphanumeric() || "-._~!$&'()*+,;=:@%/".contains(c);
+    base.starts_with('/')
+        && !base.starts_with("//")
+        && base.ends_with('/')
+        && base.chars().all(pchar)
+}
+
+fn base_spec() -> ArgSpec {
+    ArgSpec::new("base")
+        .summary(
+            "the path the toolbox is served under, path-absolute and ending in `/`: the \
+             page's assets and inputs are named below it",
+        )
+        .class(XSD_STRING)
+        .default_value(DEFAULT_BASE)
+}
+
+/// The request's `base=`, refused unless it [`is_base`]; [`DEFAULT_BASE`] when absent
+/// (the kernel injects the declared default, so absent is only a direct invocation).
+fn base_of<'a>(inv: &'a Invocation<'_>) -> Result<&'a str, Error> {
+    let base = match inv.inline_str("base") {
+        Ok(base) => base,
+        Err(Error::MissingArgument(_)) => DEFAULT_BASE,
+        Err(other) => return Err(other),
+    };
+    if !is_base(base) {
+        return Err(Error::InvalidArgument {
+            name: "base".to_string(),
+            detail: format!(
+                "`{base}` is not a path-absolute base ending in `/` (like `{DEFAULT_BASE}`)"
+            ),
+        });
+    }
+    Ok(base)
+}
 
 /// The palettes `theme=` names (UI conventions D12): `auto` follows the viewer's
 /// system. The template writes the value into `data-theme` on `<html>`, escaped.
@@ -271,6 +329,9 @@ fn input_endpoint() -> AsyncFnEndpoint {
 /// ikigai-fn's `ComposeOver` describes itself with no inputs (its arguments are
 /// compose's open set), so the view states its own ArgSpecs here and delegates every
 /// answer to the composer unchanged. No view code: what the page says is the template.
+///
+/// The one thing a view checks itself is `base=`, before composing: it prefixes URLs
+/// in the page, so a value that is not a same-origin path is refused, not spliced.
 fn view(description: Description) -> AsyncFnEndpoint {
     let composer = Arc::new(
         ikigai_fn::compose_over(Iri::parse(TEMPLATE).expect("TEMPLATE is an IRI"))
@@ -280,10 +341,13 @@ fn view(description: Description) -> AsyncFnEndpoint {
         description.id.clone(),
         move |inv: &Invocation<'_>| -> InvokeFuture<'_> {
             let composer = composer.clone();
-            Box::pin(async move { composer.invoke(inv).await })
+            Box::pin(async move {
+                base_of(inv)?;
+                composer.invoke(inv).await
+            })
         },
     )
-    .with_description(description)
+    .with_description(description.input(base_spec()))
 }
 
 fn theme_spec() -> ArgSpec {
@@ -336,6 +400,38 @@ fn check_view() -> AsyncFnEndpoint {
     )
 }
 
+/// `urn:toolbox:path:{rest}`: `{base}{rest}` as text, the template's way to name a
+/// path under the `base=` it was composed with. `rest` is spliced as the marker wrote
+/// it, so an argument in it stays the one percent-encoded segment compose made it.
+fn path_endpoint() -> FnEndpoint {
+    FnEndpoint::new("toolbox-path", |inv: &Invocation<'_>| {
+        let rest = inv
+            .bindings
+            .get("rest")
+            .ok_or_else(|| Error::MissingArgument("rest".to_string()))?;
+        let path = format!("{}{rest}", base_of(inv)?);
+        Ok(Representation::new(ReprType::new(TEXT), path.into_bytes()).cacheable())
+    })
+    .with_description(
+        Description::new("toolbox-path")
+            .title("A toolbox path")
+            .summary(
+                "A path under the base the toolbox is served from, as text: what the page \
+                 template names its assets and inputs with.",
+            )
+            .verb(Verb::Source)
+            .verb(Verb::Meta)
+            .input(
+                ArgSpec::new("rest")
+                    .summary("the path below the base")
+                    .class(XSD_STRING)
+                    .binding(),
+            )
+            .input(base_spec())
+            .output(TEXT),
+    )
+}
+
 /// `urn:toolbox:none`: the empty text. A template fallback names a resource, never a
 /// literal, so "no value" has to be one.
 fn none_endpoint() -> FnEndpoint {
@@ -365,6 +461,7 @@ fn doors(base: &str) -> Alias {
         .bind(Exact::new("urn:toolbox:page"), page_view())
         .bind(Exact::new("urn:toolbox:none"), none_endpoint())
         .bind(template("urn:toolbox:text:{message}"), ikigai_fn::echo())
+        .bind(template("urn:toolbox:path:{rest}"), path_endpoint())
         .bind(template("urn:toolbox:input:{iri}"), input_endpoint())
         .bind(template("urn:toolbox:check:{iri}"), check_view())
         .bind(

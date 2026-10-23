@@ -125,19 +125,32 @@ check("patches: each one applied", () => {
   const app = read("app.js")
   assert.match(app, /\nfunction openFrom\(\) \{/, "0001: the open-from function")
   assert.match(app, /\nif \(!openFrom\(\)\) loadSample\("starter"\)\n$/, "0001: its call")
+  assert.ok(app.includes('document.querySelector(".ed-link")?.remove()'), "0001: a page that names its input drops the sample editor link")
   const page = read("toolbox.html")
-  assert.ok(page.includes('href="https://abhishekkundu25.github.io/turtle-lsp/?editor" rel="noopener"'), "0002: the editor link")
+  assert.ok(page.includes('href="https://abhishekkundu25.github.io/turtle-lsp/?editor" rel="noopener">Open the sample editor</a>'), "0002: the sample editor link")
   assert.ok(!page.includes('href="./?editor"'), "0002: no link to an editor we do not serve")
+  assert.ok(page.includes('id="picker" class="hidden-input" aria-label="Files to open"'), "0003: the file picker is named")
+  assert.ok(page.includes('id="folder-picker" class="hidden-input" aria-label="A folder to open"'), "0003: the folder picker is named")
   const template = read("page.template.html")
-  assert.ok(template.includes('data-theme="$h{{theme} || urn:toolbox:text:auto}"'), "0003: the theme marker")
-  assert.ok(template.includes("data-inputs="), "0003: the inputs marker")
+  assert.ok(template.includes('data-theme="$h{{theme} || urn:toolbox:text:auto}"'), "0004: the theme marker")
+  assert.ok(template.includes("data-inputs="), "0004: the inputs marker")
+  assert.ok(!template.includes("ed-link"), "0004: a check page does not link the sample editor")
+  assert.ok(template.includes('aria-label="Files to open"'), "0004: the template carries 0003")
+  // Every path in the template is under base= (urn:toolbox:path), none hardcoded.
+  assert.doesNotMatch(template, /["[;]\/toolbox\//, "0004: no hardcoded /toolbox/ path")
   // D1: values go in with $h only, never $r/$a.
-  assert.doesNotMatch(template, /\$[ra]\{/, "0003: the template splices nothing unescaped")
+  assert.doesNotMatch(template, /\$[ra]\{/, "0004: the template splices nothing unescaped")
   assert.doesNotMatch(template, /<script>|\sstyle=/, "no inline script or style (D6)")
   // The crate's tests compose the template from tests/fixtures; it must be this build's.
   const pinned = fs.readFileSync(path.join(root, "tests", "fixtures", "page.template.html"), "utf8")
   assert.equal(template, pinned, "tests/fixtures/page.template.html is the built template (copy dist/'s over it)")
-  return "0001-open-from, 0002-editor-link, 0003-page-template"
+  return "0001-open-from, 0002-editor-link, 0003-input-names, 0004-page-template"
+})
+check("tokens: upstream's --faint plays the shared --muted", () => {
+  // Upstream's --faint is 2.35:1 (light) and 3.73:1 (dark) on its surface (ledger #2106).
+  const tokens = fs.readFileSync(path.join(dist, "tokens.css"), "utf8")
+  assert.match(tokens, /\n  --faint: var\(--muted\);\n/)
+  return "--faint: var(--muted)"
 })
 
 if (failed) {

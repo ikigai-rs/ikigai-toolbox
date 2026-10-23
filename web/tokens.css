@@ -60,15 +60,20 @@
 }
 
 /* 2. The mapping: upstream's name on the left, the shared token it plays. --bg,
- * --muted and --line are already the shared names, so they need no line. */
+ * --muted and --line are already the shared names, so they need no line.
+ * Upstream's --faint (the counts, the drop hint, the footer, line numbers) is
+ * its quieter muted text; there is no fainter shared token, and upstream's own
+ * values are 2.35:1 on the light surface and 3.73:1 on the dark one, under the
+ * 4.5:1 text needs (WCAG 1.4.3). It plays --muted: 6.17:1 and 7.17:1. */
 :root:is([data-theme], :not([data-theme])) {
   --panel: var(--surface);
   --panel-hd: var(--surface);
   --tx: var(--fg);
+  --faint: var(--muted);
   --acc: var(--accent);
   --on-acc: var(--accent-fg);
 }
 
-/* The checked resource's link in the header (the page template's .checked). */
-.checked { color: var(--accent); font-size: 13px; overflow-wrap: anywhere; }
+/* The checked resource's IRI in the header (the page template's .checked). */
+.checked { color: var(--fg); font-size: 13px; overflow-wrap: anywhere; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

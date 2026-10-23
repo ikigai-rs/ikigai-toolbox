@@ -4,8 +4,9 @@
 //!
 //! - Every toolbox read is declared `cacheable`: the file and input readers mark
 //!   their answers cacheable and take expiry and threads from the sub-request, the
-//!   views are compositions (cacheable while every part is), `echo` and
-//!   `urn:toolbox:none` are pure functions of their name.
+//!   views are compositions (cacheable while every part is), `echo`,
+//!   `urn:toolbox:none` and `urn:toolbox:path:{rest}` are pure functions of their
+//!   name (and, for the path, its `base=`).
 //! - FAILURES is opted into (`check_failures`, ahead of 0.11 making it the default).
 //!   No toolbox action states its failure classes, deliberately: the readers pass
 //!   their sub-request's failure through, and what a host binds at the base or names
@@ -23,13 +24,14 @@ use ikigai_conformance::{Check, Fixture, Suite};
 use ikigai_core::Verb;
 
 /// Every endpoint the toolbox binds, by description id.
-const TOOLBOX: [&str; 6] = [
+const TOOLBOX: [&str; 7] = [
     "toolbox-file",
     "toolbox-input",
     "toolbox-page",
     "toolbox-check",
     "echo",
     "toolbox-none",
+    "toolbox-path",
 ];
 
 const RDF_FACE_IS_THE_NAMES: &str = "the media type is fixed by the file NAME, not by as=: \
@@ -53,6 +55,8 @@ fn conforms() {
         .pure("echo")
         .pure("toolbox-none")
         .cacheable("toolbox-none")
+        .pure("toolbox-path")
+        .cacheable("toolbox-path")
         // The two RDF checks ask ONE fixture for every declared RDF face by `as=`; here
         // the media type is the NAME's, so the fixture (style.css) answers text/css under
         // every `as=`, and the JSON-LD face belongs to MANIFEST.jsonld alone. Its Turtle

@@ -60,7 +60,7 @@
     {
       "@id": "urn:toolbox:toolbox.html",
       "title": "toolbox.html",
-      "description": "upstream web/app/toolbox.html with patches/0002-editor-link.patch",
+      "description": "upstream web/app/toolbox.html with patches/0002-editor-link.patch and 0003-input-names.patch",
       "mediaType": "text/html; charset=utf-8",
       "sizeBytes": 3337,
       "identifier": "sha256-3032ebd364535d03ed0d0b65f1ddeb51cd13fa238d42fc3160fb3da32a930924",
@@ -70,7 +70,7 @@
     {
       "@id": "urn:toolbox:page.template.html",
       "title": "page.template.html",
-      "description": "toolbox.html (as patched) made an ikigai-fn compose template by patches/0003-page-template.patch: urn:toolbox:template:page",
+      "description": "toolbox.html (as patched) made an ikigai-fn compose template by patches/0004-page-template.patch: urn:toolbox:template:page",
       "mediaType": "text/html; charset=utf-8",
       "sizeBytes": 3830,
       "identifier": "sha256-9fc561a111dd6ffb0b2c1c5ab91f5d63649d207744c38ab5e2ac4188f5fcf3dd",

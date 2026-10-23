@@ -36,9 +36,9 @@ const FILES = {
 }
 // What each file is, beyond its upstream origin.
 const WHAT = {
-  "toolbox.html": "upstream web/app/toolbox.html with patches/0002-editor-link.patch",
+  "toolbox.html": "upstream web/app/toolbox.html with patches/0002-editor-link.patch and 0003-input-names.patch",
   "page.template.html":
-    "toolbox.html (as patched) made an ikigai-fn compose template by patches/0003-page-template.patch: urn:toolbox:template:page",
+    "toolbox.html (as patched) made an ikigai-fn compose template by patches/0004-page-template.patch: urn:toolbox:template:page",
   "app.js": "upstream web/app/app.js with patches/0001-open-from.patch",
   "samples.js": "upstream web/app/samples.js",
   "worker.js": "upstream web/app/worker.js",

@@ -1,6 +1,6 @@
 [package]
 name = "ikigai-toolbox"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 # Probed 2026-10-19: 1.86 fails in ikigai-core (`usize::is_multiple_of`, stable in 1.87);
 # 1.87 builds the lib and every test target. The shared CI's msrv job holds it there.
@@ -22,24 +22,23 @@ exclude = ["/vendor", "/dist", "/patches", "/tests", "/web", "/tools", "/build.s
 
 [dependencies]
 # The released kernel, the SAME one the hosts use, so a host links one ikigai-core.
-# 0.1.89 is the true minimum: `space_iri` and a `named` that a later `bind` drops (the
-# space's name, ledger #987), `Alias::named` (0.1.78), `AsyncFnEndpoint` (0.1.51).
-# Under 0.x a caret is a range: this admits every 0.1.x from 0.1.89 on, never 0.2.
-ikigai-core = "0.1.89"
+# 0.2.0 is the streams release (ledger #2261). The old 0.1 pin meant
+# <0.2.0 under 0.x caret rules.
+ikigai-core = "0.2.0"
 # The views are ikigai-fn `composeOver` over the page template (named instances,
 # 0.3.1), and `urn:toolbox:text:{text}` is its `echo`. 0.5.0 is the floor for the
 # escaping the page relies on: `$h` per FND-H's rule set, C0 controls to U+FFFD, and
 # an argument spliced into a marker IRI percent-encoded as one segment (ledger #1813).
-# A caret on 0.5.0 is `<0.6.0`: a ceiling as well as a floor (field guide rule 5).
-ikigai-fn = "0.5.0"
+# 0.7.0 carries these endpoints onto core 0.2.0.
+ikigai-fn = "0.7.0"
 
 [dev-dependencies]
 futures = "0.3"
 # The module recipe as one test (tests/conformance.rs), at the current minor.
-ikigai-conformance = "0.10.0"
+ikigai-conformance = "0.11.0"
 # The manifest's Turtle face: ikigai-rdf's `urn:rdf:transrept` is the transreptor that
 # reaches text/turtle from application/ld+json (ikigai-jsonld's operators are
 # JSON-LD-to-JSON-LD transformations, not transreptors).
-ikigai-rdf = "0.2.6"
+ikigai-rdf = "0.3.0"
 # The README's host: ikigai-fs's FileEndpoint over a build directory (tests/host.rs).
-ikigai-fs = "0.1.9"
+ikigai-fs = "0.2.0"

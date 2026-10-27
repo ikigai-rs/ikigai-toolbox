@@ -177,7 +177,7 @@ built directory behind a feature of its own and bind it at `DIST`, and the names
   layer's closed SHACL shapes (ikigai-layers-client's `talk.shapes.ttl`) against a conforming
   message, one with an unknown property and one with a non-IRI `ik:inReplyTo`, and a SPARQL query
   with one error. It also checks the manifest against the files and checks that every patch applied.
-- `tests/conformance.rs`: the module recipe (ikigai-conformance 0.10, FAILURES opted in).
+- `tests/conformance.rs`: the module recipe (ikigai-conformance 0.11, DATATYPES and FAILURES enabled by default).
 - `tests/files.rs`: the allowlist and its media types, the refusals (`../x`, `%2e%2e/x`, an
   unlisted name: `NotFound` with no sub-request), NotFound passthrough, and the manifest's Turtle
   face (through ikigai-rdf's transreptor).

@@ -7,7 +7,7 @@
 //!   views are compositions (cacheable while every part is), `echo`,
 //!   `urn:toolbox:none` and `urn:toolbox:path:{rest}` are pure functions of their
 //!   name (and, for the path, its `base=`).
-//! - FAILURES is opted into (`check_failures`, ahead of 0.11 making it the default).
+//! - DATATYPES and FAILURES run by default in ikigai-conformance 0.11.
 //!   No toolbox action states its failure classes, deliberately: the readers pass
 //!   their sub-request's failure through, and what a host binds at the base or names
 //!   as an input can fail in any class, so a stated list would be a guess. The report
@@ -42,7 +42,6 @@ fn conforms() {
     let host = Host::new();
     let space_at = Arc::new(ikigai_toolbox::space_at("urn:example:elsewhere:"));
     let report = Suite::new()
-        .check_failures()
         .fixture(Fixture::new("toolbox-file", Verb::Source).binding("name", "style.css"))
         .fixture(Fixture::new("toolbox-input", Verb::Source).binding("iri", "urn:example:data"))
         .fixture(Fixture::new("toolbox-check", Verb::Source).binding("iri", "urn:example:data"))
@@ -57,12 +56,13 @@ fn conforms() {
         .cacheable("toolbox-none")
         .pure("toolbox-path")
         .cacheable("toolbox-path")
-        // The two RDF checks ask ONE fixture for every declared RDF face by `as=`; here
+        // The RDF checks ask ONE fixture for every declared RDF face by `as=`; here
         // the media type is the NAME's, so the fixture (style.css) answers text/css under
         // every `as=`, and the JSON-LD face belongs to MANIFEST.jsonld alone. Its Turtle
         // face is held to no blank nodes by tests/files.rs instead.
         .opt_out_check("toolbox-file", Check::SkolemRdf, RDF_FACE_IS_THE_NAMES)
         .opt_out_check("toolbox-file", Check::Vocabulary, RDF_FACE_IS_THE_NAMES)
+        .opt_out_check("toolbox-file", Check::Datatypes, RDF_FACE_IS_THE_NAMES)
         // The host's fixtures: constants, so pure; their example.org terms are fixtures'.
         .pure("test-dist")
         .pure("test-data")

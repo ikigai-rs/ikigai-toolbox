@@ -45,8 +45,9 @@
 
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use ikigai_core::{
-    space_iri, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Description, Endpoint,
+    space_iri, Alias, AliasTable, ArgRef, ArgSpec, AsyncFnEndpoint, Body, Description, Endpoint,
     EndpointSpace, Error, Exact, FnEndpoint, Invocation, InvokeFuture, Iri, ReprType,
     Representation, Request, UriTemplate, Verb,
 };
@@ -191,39 +192,81 @@ pub const THEMES: &[&str] = &["auto", "light", "dark"];
 
 // --- the file reader -------------------------------------------------------------
 
-/// `urn:toolbox:{name}`: Source `{base}{name}` as bytes and serve them with the type
-/// the name fixes. A name outside [`FILES`] is `NotFound` with no sub-request; the
-/// base's `NotFound` is `NotFound` for the name asked; every other failure passes
-/// through as it came. Expiry and golden threads are the sub-request's.
-fn file_endpoint(base: Arc<str>) -> AsyncFnEndpoint {
-    AsyncFnEndpoint::new(
-        "toolbox-file",
-        move |inv: &Invocation<'_>| -> InvokeFuture<'_> {
-            let base = base.clone();
-            Box::pin(async move {
-                let asked = inv.request.target.as_str();
-                let name = inv.bindings.get("name").unwrap_or_default();
-                let Some(media) = media_type(name) else {
-                    return Err(Error::NotFound(format!(
-                        "{asked}: not a toolbox file (the names are: {})",
-                        FILES.iter().map(|(n, _)| *n).collect::<Vec<_>>().join(", ")
-                    )));
-                };
-                let source = Iri::parse(format!("{base}{name}")).map_err(|e| {
-                    Error::Endpoint(format!("{asked}: the base `{base}` makes no IRI: {e}"))
-                })?;
-                let request = Request::new(Verb::Source, source)
-                    .with_arg("as", ArgRef::Inline(OCTET_STREAM.as_bytes().to_vec()));
-                match inv.issue(request).await {
-                    Ok(rep) => Ok(Representation::new(ReprType::new(media), rep.bytes).cacheable()),
-                    Err(Error::NotFound(why)) => Err(Error::NotFound(format!("{asked}: {why}"))),
-                    Err(other) => Err(other),
-                }
-            })
-        },
-    )
-    .with_description(
-        Description::new("toolbox-file")
+/// `urn:toolbox:{name}`: Source `{base}{name}` and serve its answer with the type the
+/// name fixes. A name outside [`FILES`] is `NotFound` with no sub-request; the base's
+/// `NotFound` is `NotFound` for the name asked; every other failure passes through as
+/// it came. Expiry and golden threads are the sub-request's.
+///
+/// Two paths, one answer. The body path (`invoke_body`, what the kernel calls) hands
+/// the base's body through as it came (ledger #2290): an fs `Replay` keeps its
+/// validator, its length and its range reads, and nothing is read on the way. The
+/// bytes path (`invoke`) is the base's answer collected under the run's byte budget,
+/// as before.
+struct FileEndpoint {
+    base: Arc<str>,
+    description: Description,
+}
+
+impl FileEndpoint {
+    /// The media type `urn:toolbox:{name}` fixes and the request for its file, or
+    /// `NotFound` for a name outside [`FILES`].
+    fn plan(&self, inv: &Invocation<'_>) -> Result<(&'static str, Request), Error> {
+        let asked = inv.request.target.as_str();
+        let name = inv.bindings.get("name").unwrap_or_default();
+        let Some(media) = media_type(name) else {
+            return Err(Error::NotFound(format!(
+                "{asked}: not a toolbox file (the names are: {})",
+                FILES.iter().map(|(n, _)| *n).collect::<Vec<_>>().join(", ")
+            )));
+        };
+        let base = &self.base;
+        let source = Iri::parse(format!("{base}{name}")).map_err(|e| {
+            Error::Endpoint(format!("{asked}: the base `{base}` makes no IRI: {e}"))
+        })?;
+        let request = Request::new(Verb::Source, source)
+            .with_arg("as", ArgRef::Inline(OCTET_STREAM.as_bytes().to_vec()));
+        Ok((media, request))
+    }
+}
+
+/// The base's failure as the name's: its `NotFound` names the file asked.
+fn as_asked(inv: &Invocation<'_>, error: Error) -> Error {
+    match error {
+        Error::NotFound(why) => Error::NotFound(format!("{}: {why}", inv.request.target.as_str())),
+        other => other,
+    }
+}
+
+#[async_trait]
+impl Endpoint for FileEndpoint {
+    async fn invoke(&self, inv: &Invocation<'_>) -> Result<Representation, Error> {
+        let (media, request) = self.plan(inv)?;
+        let rep = inv.issue(request).await.map_err(|e| as_asked(inv, e))?;
+        Ok(Representation::new(ReprType::new(media), rep.bytes).cacheable())
+    }
+
+    async fn invoke_body(&self, inv: &Invocation<'_>) -> Result<Representation<Body>, Error> {
+        let (media, request) = self.plan(inv)?;
+        let rep = inv
+            .issue_body(request)
+            .await
+            .map_err(|e| as_asked(inv, e))?;
+        Ok(Representation::from_body(ReprType::new(media), rep.bytes).cacheable())
+    }
+
+    fn name(&self) -> &str {
+        "toolbox-file"
+    }
+
+    fn describe(&self) -> Description {
+        self.description.clone()
+    }
+}
+
+fn file_endpoint(base: Arc<str>) -> FileEndpoint {
+    FileEndpoint {
+        base,
+        description: Description::new("toolbox-file")
             .title("A toolbox file")
             .summary(
                 "One file of the RDF Toolbox build (turtle-lsp in the browser), by name from a \
@@ -245,7 +288,7 @@ fn file_endpoint(base: Arc<str>) -> AsyncFnEndpoint {
             .output("application/wasm")
             .output(TEXT)
             .output("application/ld+json"),
-    )
+    }
 }
 
 // --- the input reader ------------------------------------------------------------

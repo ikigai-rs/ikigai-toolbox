@@ -1,6 +1,6 @@
 [package]
 name = "ikigai-toolbox"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 # Probed 2026-10-19: 1.86 fails in ikigai-core (`usize::is_multiple_of`, stable in 1.87);
 # 1.87 builds the lib and every test target. The shared CI's msrv job holds it there.
@@ -31,6 +31,8 @@ ikigai-core = "0.2.0"
 # an argument spliced into a marker IRI percent-encoded as one segment (ledger #1813).
 # 0.7.0 carries these endpoints onto core 0.2.0.
 ikigai-fn = "0.7.0"
+# `Endpoint` is an async-trait trait; the file reader implements it for its body path.
+async-trait = "0.1"
 
 [dev-dependencies]
 futures = "0.3"
@@ -41,4 +43,5 @@ ikigai-conformance = "0.11.0"
 # JSON-LD-to-JSON-LD transformations, not transreptors).
 ikigai-rdf = "0.3.0"
 # The README's host: ikigai-fs's FileEndpoint over a build directory (tests/host.rs).
-ikigai-fs = "0.2.0"
+# 0.2.2's file Source answers a seekable `Replay` (tests/bodies.rs's large input).
+ikigai-fs = "0.2.2"

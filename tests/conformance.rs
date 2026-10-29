@@ -12,6 +12,9 @@
 //!   their sub-request's failure through, and what a host binds at the base or names
 //!   as an input can fail in any class, so a stated list would be a guess. The report
 //!   lists them on its `failures:` line.
+//! - BODIES and BODY-INPUTS run by default in ikigai-conformance 0.12. The
+//!   suite shares the kernel root for direct body comparisons and refuses unprobed
+//!   checks. No bound argument declares `reads_body`, so no content store is needed.
 //! - `space()` is self-named `urn:iki:space:toolbox` (it reads its build at the fixed
 //!   name `ikigai_toolbox::DIST`); `space_at(base)` is host-named.
 
@@ -20,7 +23,7 @@ mod common;
 use std::sync::Arc;
 
 use common::Host;
-use ikigai_conformance::{Check, Fixture, Suite};
+use ikigai_conformance::{Check, Expected, Fixture, Suite};
 use ikigai_core::Verb;
 
 /// Every endpoint the toolbox binds, by description id.
@@ -42,6 +45,7 @@ fn conforms() {
     let host = Host::new();
     let space_at = Arc::new(ikigai_toolbox::space_at("urn:example:elsewhere:"));
     let report = Suite::new()
+        .body_space(host.space.clone())
         .fixture(Fixture::new("toolbox-file", Verb::Source).binding("name", "style.css"))
         .fixture(Fixture::new("toolbox-input", Verb::Source).binding("iri", "urn:example:data"))
         .fixture(Fixture::new("toolbox-check", Verb::Source).binding("iri", "urn:example:data"))
@@ -90,7 +94,7 @@ fn conforms() {
         .self_named_space("toolbox", ikigai_toolbox::space)
         .host_named_space("ikigai_toolbox::space_at(base)", space_at)
         .run_blocking(&host.kernel);
-    assert!(report.is_clean(), "{report}");
+    report.assert_clean_with(&Expected::new().nothing_unprobed());
     println!("{report}");
     assert_eq!(
         ikigai_core::space_iri("toolbox").as_str(),

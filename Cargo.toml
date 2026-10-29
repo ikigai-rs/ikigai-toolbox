@@ -37,7 +37,7 @@ async-trait = "0.1"
 [dev-dependencies]
 futures = "0.3"
 # The module recipe as one test (tests/conformance.rs), at the current minor.
-ikigai-conformance = "0.11.0"
+ikigai-conformance = "0.12.0"
 # The manifest's Turtle face: ikigai-rdf's `urn:rdf:transrept` is the transreptor that
 # reaches text/turtle from application/ld+json (ikigai-jsonld's operators are
 # JSON-LD-to-JSON-LD transformations, not transreptors).

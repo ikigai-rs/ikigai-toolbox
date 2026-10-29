@@ -60,6 +60,7 @@ fn turtle(id: &str, title: &str, body: &'static str) -> FnEndpoint {
 /// them guarded), the manifest's JSON-LD transreptor (ikigai-rdf), and the toolbox.
 pub struct Host {
     pub kernel: Kernel,
+    pub space: Arc<dyn Space>,
     pub reads: Arc<AtomicUsize>,
 }
 
@@ -148,12 +149,17 @@ impl Host {
             )
             .bind(Exact::new("urn:example:secret"), secret)
             .bind(Exact::new("urn:example:jsonld"), jsonld);
-        let kernel = Kernel::new(Arc::new(Fallback::new(vec![
+        let space: Arc<dyn Space> = Arc::new(Fallback::new(vec![
             toolbox,
             Arc::new(host),
             Arc::new(ikigai_rdf::space()),
-        ])));
-        Host { kernel, reads }
+        ]));
+        let kernel = Kernel::new(space.clone());
+        Host {
+            kernel,
+            space,
+            reads,
+        }
     }
 
     pub fn reads(&self) -> usize {

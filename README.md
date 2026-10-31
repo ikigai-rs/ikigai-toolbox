@@ -186,6 +186,11 @@ built directory behind a feature of its own and bind it at `DIST`, and the names
   named file inputs, and an input refused to a caller who cannot read it.
 - `tests/host.rs`: the mount above, with ikigai-fs over a real directory.
 
+## Accessibility
+
+See [ACCESSIBILITY.md](ACCESSIBILITY.md) for the vendored page’s reviewed features,
+known gaps, testing limits and upstream ownership.
+
 ## License
 
 `MIT OR Apache-2.0` for this repository. turtle-lsp, vendored as a submodule and copied into every

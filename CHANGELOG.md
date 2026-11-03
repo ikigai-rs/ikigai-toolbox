@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- Move to ikigai-fn 0.9.0 and ikigai-core's floor 0.2.8, so a host on ikigai-fn 0.9
+  links one copy of it. A minor bump because the dependency's API moved; this
+  crate's names and pages are unchanged, and the view snapshots did not move.
+- ikigai-fn 0.8 issues an unquoted `<iri>` marker argument as a reference. The page
+  template writes none, and an argument of a request that fills a marker stays a
+  value. `tests/references.rs` holds both, what such a marker would do, and that
+  `urn:toolbox:check:{iri}` reads nothing itself: its input reads as the caller.
+
 ## 0.2.1
 
 - `urn:toolbox:{name}` passes its file's body through (ledger #2290). The kernel's

@@ -1,6 +1,6 @@
 [package]
 name = "ikigai-toolbox"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 # Probed 2026-10-19: 1.86 fails in ikigai-core (`usize::is_multiple_of`, stable in 1.87);
 # 1.87 builds the lib and every test target. The shared CI's msrv job holds it there.
@@ -23,14 +23,16 @@ exclude = ["/vendor", "/dist", "/patches", "/tests", "/web", "/tools", "/build.s
 [dependencies]
 # The released kernel, the SAME one the hosts use, so a host links one ikigai-core.
 # 0.2.0 is the streams release (ledger #2261). The old 0.1 pin meant
-# <0.2.0 under 0.x caret rules.
-ikigai-core = "0.2.0"
+# <0.2.0 under 0.x caret rules. 0.2.8 is the floor ikigai-fn 0.8 needs: contract-based
+# settlement of a by-reference argument.
+ikigai-core = "0.2.8"
 # The views are ikigai-fn `composeOver` over the page template (named instances,
 # 0.3.1), and `urn:toolbox:text:{text}` is its `echo`. 0.5.0 is the floor for the
 # escaping the page relies on: `$h` per FND-H's rule set, C0 controls to U+FFFD, and
 # an argument spliced into a marker IRI percent-encoded as one segment (ledger #1813).
-# 0.7.0 carries these endpoints onto core 0.2.0.
-ikigai-fn = "0.7.0"
+# 0.7.0 carries these endpoints onto core 0.2.0. 0.9.0 is what the books use, so a host
+# links one ikigai-fn; 0.8's reference arguments are held by tests/references.rs.
+ikigai-fn = "0.9.0"
 # `Endpoint` is an async-trait trait; the file reader implements it for its body path.
 async-trait = "0.1"
 

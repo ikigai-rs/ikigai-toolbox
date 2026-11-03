@@ -1,6 +1,6 @@
 [package]
 name = "ikigai-toolbox"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 # Probed 2026-10-19: 1.86 fails in ikigai-core (`usize::is_multiple_of`, stable in 1.87);
 # 1.87 builds the lib and every test target. The shared CI's msrv job holds it there.
@@ -22,28 +22,27 @@ exclude = ["/vendor", "/dist", "/patches", "/tests", "/web", "/tools", "/build.s
 
 [dependencies]
 # The released kernel, the SAME one the hosts use, so a host links one ikigai-core.
-# 0.2.0 is the streams release (ledger #2261). The old 0.1 pin meant
-# <0.2.0 under 0.x caret rules. 0.2.8 is the floor ikigai-fn 0.8 needs: contract-based
-# settlement of a by-reference argument.
-ikigai-core = "0.2.8"
+# Core 0.3.0 scopes held content to its deliverer (ledger #2965); principal-less
+# holds belong to root, and ContentStore::put/put_replay are root-only.
+ikigai-core = "0.3.0"
 # The views are ikigai-fn `composeOver` over the page template (named instances,
 # 0.3.1), and `urn:toolbox:text:{text}` is its `echo`. 0.5.0 is the floor for the
 # escaping the page relies on: `$h` per FND-H's rule set, C0 controls to U+FFFD, and
 # an argument spliced into a marker IRI percent-encoded as one segment (ledger #1813).
-# 0.7.0 carries these endpoints onto core 0.2.0. 0.9.0 is what the books use, so a host
-# links one ikigai-fn; 0.8's reference arguments are held by tests/references.rs.
-ikigai-fn = "0.9.0"
+# 0.10.0 carries these endpoints onto core 0.3.0 so the host links one core;
+# 0.8's reference arguments are held by tests/references.rs.
+ikigai-fn = "0.10.0"
 # `Endpoint` is an async-trait trait; the file reader implements it for its body path.
 async-trait = "0.1"
 
 [dev-dependencies]
 futures = "0.3"
 # The module recipe as one test (tests/conformance.rs), at the current minor.
-ikigai-conformance = "0.12.0"
+ikigai-conformance = "0.14.0"
 # The manifest's Turtle face: ikigai-rdf's `urn:rdf:transrept` is the transreptor that
 # reaches text/turtle from application/ld+json (ikigai-jsonld's operators are
 # JSON-LD-to-JSON-LD transformations, not transreptors).
-ikigai-rdf = "0.3.0"
+ikigai-rdf = "0.5.0"
 # The README's host: ikigai-fs's FileEndpoint over a build directory (tests/host.rs).
 # 0.2.2's file Source answers a seekable `Replay` (tests/bodies.rs's large input).
-ikigai-fs = "0.2.2"
+ikigai-fs = "0.4.0"

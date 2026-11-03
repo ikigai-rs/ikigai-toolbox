@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+- Move to ikigai-core 0.3.0 for deliverer-scoped held content (ledger #2965).
+  Bump the minor version because the public API exposes core types.
+- Update ikigai-fn to 0.10.0 and the dev dependencies ikigai-conformance to
+  0.14.0, ikigai-rdf to 0.5.0, and ikigai-fs to 0.4.0 so test hosts link one core.
+
 ## 0.3.0
 
 - Move to ikigai-fn 0.9.0 and ikigai-core's floor 0.2.8, so a host on ikigai-fn 0.9

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- `urn:toolbox:check:{iri}` refuses an `iri` or `shapes=` that is not an absolute IRI
+  (`InvalidArgument`), as `urn:toolbox:input:{iri}` already did. A value with no scheme
+  stayed a dot segment in the page's input path: `..` composed `/toolbox/input/..`, which
+  the browser resolves to `/toolbox/`, so the page fetched the base as its input.
+
 ## 0.4.0
 
 - Move to ikigai-core 0.3.0 for deliverer-scoped held content (ledger #2965).

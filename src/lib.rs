@@ -91,7 +91,7 @@ object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'";
 /// NAME fixes. Nothing else under `urn:toolbox:` reads a file, so the family is never a
 /// general file server.
 ///
-/// The same table is `tools/manifest.mjs`'s, and `tests/media_types.rs` holds the two
+/// The same table is `tools/manifest.mjs`'s, and `tests/files.rs` holds the two
 /// equal.
 ///
 /// ```
@@ -291,6 +291,30 @@ fn file_endpoint(base: Arc<str>) -> FileEndpoint {
     }
 }
 
+/// `raw` as the IRI argument `name` names, refused unless it is an absolute IRI.
+fn iri_arg(name: &str, raw: &str) -> Result<Iri, Error> {
+    Iri::parse(raw).map_err(|e| Error::InvalidArgument {
+        name: name.to_string(),
+        detail: format!("not an IRI: {e}"),
+    })
+}
+
+/// The request's `iri` binding and `shapes=`, each refused unless it is an absolute
+/// IRI (the input reader's rule). The view splices them into the page's input paths
+/// as one percent-encoded segment each; an absolute IRI's `:` is always encoded, but
+/// a value without one can stay a dot segment (`..`, `.`) that the browser resolves
+/// to a path other than the input's.
+fn named_iris(inv: &Invocation<'_>) -> Result<(), Error> {
+    if let Some(raw) = inv.bindings.get("iri") {
+        iri_arg("iri", raw)?;
+    }
+    match inv.inline_str("shapes") {
+        Ok(raw) => iri_arg("shapes", raw).map(drop),
+        Err(Error::MissingArgument(_)) => Ok(()),
+        Err(other) => Err(other),
+    }
+}
+
 // --- the input reader ------------------------------------------------------------
 
 /// `urn:toolbox:input:{iri}`: the resource's Turtle face, as `text/plain` for the page
@@ -306,10 +330,7 @@ fn input_endpoint() -> AsyncFnEndpoint {
                     .bindings
                     .get("iri")
                     .ok_or_else(|| Error::MissingArgument("iri".to_string()))?;
-                let target = Iri::parse(raw).map_err(|e| Error::InvalidArgument {
-                    name: "iri".to_string(),
-                    detail: format!("not an IRI: {e}"),
-                })?;
+                let target = iri_arg("iri", raw)?;
                 let request = Request::new(Verb::Source, target.clone())
                     .with_arg("as", ArgRef::Inline(TURTLE.as_bytes().to_vec()));
                 let mut rep = inv.issue(request).await?;
@@ -373,8 +394,10 @@ fn input_endpoint() -> AsyncFnEndpoint {
 /// compose's open set), so the view states its own ArgSpecs here and delegates every
 /// answer to the composer unchanged. No view code: what the page says is the template.
 ///
-/// The one thing a view checks itself is `base=`, before composing: it prefixes URLs
-/// in the page, so a value that is not a same-origin path is refused, not spliced.
+/// What a view checks itself, before composing, is what lands in a URL in the page:
+/// `base=` prefixes them, so a value that is not a same-origin path is refused, not
+/// spliced; `iri` and `shapes=` name the inputs, so a value that is not an IRI is
+/// refused too.
 fn view(description: Description) -> AsyncFnEndpoint {
     let composer = Arc::new(
         ikigai_fn::compose_over(Iri::parse(TEMPLATE).expect("TEMPLATE is an IRI"))
@@ -386,6 +409,7 @@ fn view(description: Description) -> AsyncFnEndpoint {
             let composer = composer.clone();
             Box::pin(async move {
                 base_of(inv)?;
+                named_iris(inv)?;
                 composer.invoke(inv).await
             })
         },

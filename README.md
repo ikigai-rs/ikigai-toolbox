@@ -101,6 +101,8 @@ simple choice, and at that cost it is the recommended one.
   `{base}input/{iri}`), so a host under a prefix (a static site at `/my-project/toolbox/`)
   passes `base=/my-project/toolbox/` and rewrites nothing. It must be path-absolute (`/`, not
   `//`), end in `/`, and hold only URI path characters; anything else is `InvalidArgument`.
+  The checked `iri` and `shapes=` must each be an absolute IRI, as the input reader requires;
+  anything else is `InvalidArgument` on that argument.
 - **`/toolbox/toolbox.html?from=/a.ttl&from=/a.shapes.ttl#shacl`** is the static page fetching
   same-origin paths. The fragment still picks the tool. A page opened on inputs drops its link
   to the sample editor, for the check page's reason.
@@ -182,8 +184,9 @@ built directory behind a feature of its own and bind it at `DIST`, and the names
   unlisted name: `NotFound` with no sub-request), NotFound passthrough, and the manifest's Turtle
   face (through ikigai-rdf's transreptor).
 - `tests/views.rs`: snapshots of the page and a check page, a hostile `theme=` and a hostile IRI
-  escaped, `base=` honored and a non-path `base=` refused, no editor link on a composed page,
-  named file inputs, and an input refused to a caller who cannot read it.
+  escaped, `base=` honored and a non-path `base=` refused, an `iri` or `shapes=` that is not
+  an IRI refused (`..` would compose an input path the browser resolves to the base), no
+  editor link on a composed page, named file inputs, and an input refused to a caller who cannot read it.
 - `tests/host.rs`: the mount above, with ikigai-fs over a real directory.
 
 ## Accessibility

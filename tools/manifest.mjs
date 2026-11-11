@@ -21,7 +21,7 @@ if (!commit) {
 }
 
 // The media type each name fixes: the same table the crate serves them with
-// (src/lib.rs MEDIA_TYPES), checked against this file by tests/smoke.mjs.
+// (src/lib.rs FILES), checked against this file by tests/files.rs.
 const FILES = {
   "toolbox.html": "text/html; charset=utf-8",
   "page.template.html": "text/html; charset=utf-8",

@@ -88,15 +88,17 @@ fn a_quoted_angle_value_stays_inline_text() {
 fn an_angle_valued_request_argument_stays_a_value() {
     // A request's argument fills a marker when composing; it never becomes a reference,
     // or a caller could make the template read what they name.
-    let html = Host::new().text(
+    // Angle brackets make no IRI, so the check page refuses the value, as the input
+    // reader would, and reads nothing.
+    let host = Host::new();
+    match host.source_with(
         "urn:toolbox:check:urn:example:data",
         &[("shapes", "<urn:example:secret>")],
-    );
-    assert!(
-        html.contains("/toolbox/input/%3Curn%3Aexample%3Asecret%3E"),
-        "{html}"
-    );
-    assert!(!html.contains(DATA), "{html}");
+        &no_scopes(),
+    ) {
+        Err(Error::InvalidArgument { name, .. }) => assert_eq!(name, "shapes"),
+        other => panic!("expected InvalidArgument on `shapes`, got {other:?}"),
+    }
     let refused = Host::new().source_with(
         "urn:toolbox:page",
         &[("base", "<urn:example:secret>")],

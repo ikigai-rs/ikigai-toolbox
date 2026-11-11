@@ -80,7 +80,7 @@ fn a_hostile_iri_comes_out_escaped_and_encoded() {
     let iri = "urn:example:a'b&c/../d?e=f";
     let html = host.text(
         &format!("urn:toolbox:check:{iri}"),
-        &[("shapes", "urn:x:\"'><")],
+        &[("shapes", "urn:x:'&'")],
     );
     assert!(
         html.contains(r#"about="urn:example:a&#39;b&amp;c/../d?e=f""#),
@@ -89,10 +89,10 @@ fn a_hostile_iri_comes_out_escaped_and_encoded() {
     assert!(html.contains(">urn:example:a&#39;b&amp;c/../d?e=f</span>"));
     assert!(html.contains("/toolbox/input/urn%3Aexample%3Aa%27b%26c%2F..%2Fd%3Fe%3Df"));
     assert!(
-        html.contains("/toolbox/input/urn%3Ax%3A%22%27%3E%3C"),
+        html.contains("/toolbox/input/urn%3Ax%3A%27%26%27"),
         "{html}"
     );
-    for raw in ["'b&c", "\"'><"] {
+    for raw in ["'b&c", "'&'"] {
         assert!(!html.contains(raw), "{raw} reached the page unescaped");
     }
 }
@@ -125,6 +125,52 @@ fn an_input_that_is_not_an_absolute_iri_is_refused() {
     match Host::new().source("urn:toolbox:input:no-scheme") {
         Err(Error::InvalidArgument { name, .. }) => assert_eq!(name, "iri"),
         other => panic!("expected InvalidArgument on `iri`, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_check_of_what_is_not_an_iri_is_refused() {
+    // The view splices `iri` and `shapes=` into the page's input paths as one
+    // percent-encoded segment each, and the page fetches them. A value with no scheme
+    // has no `:` to encode, so `..` or `.` stays a dot segment the browser resolves
+    // away: `/toolbox/input/..` is `/toolbox/`, a same-origin path the page would read
+    // as its input. The input reader refuses such a value, so the view does too.
+    let host = Host::new();
+    for (name, args, arg) in [
+        ("urn:toolbox:check:..", &[][..], "iri"),
+        ("urn:toolbox:check:.", &[][..], "iri"),
+        ("urn:toolbox:check:no-scheme", &[][..], "iri"),
+        (
+            "urn:toolbox:check:urn:example:data",
+            &[("shapes", "..")][..],
+            "shapes",
+        ),
+        (
+            "urn:toolbox:check:urn:example:data",
+            &[("shapes", ".")][..],
+            "shapes",
+        ),
+        (
+            "urn:toolbox:check:urn:example:data",
+            &[("shapes", "")][..],
+            "shapes",
+        ),
+        (
+            "urn:toolbox:check:urn:example:data",
+            &[("shapes", "urn:x:\"'><")][..],
+            "shapes",
+        ),
+    ] {
+        match host.source_with(name, args, &Capability::root()) {
+            Err(Error::InvalidArgument { name: refused, .. }) => {
+                assert_eq!(refused, arg, "{name} {args:?}")
+            }
+            Ok(page) => panic!(
+                "{name} {args:?} composed a page: {}",
+                String::from_utf8_lossy(&page.bytes)
+            ),
+            Err(other) => panic!("{name} {args:?}: expected InvalidArgument, got {other:?}"),
+        }
     }
 }
 

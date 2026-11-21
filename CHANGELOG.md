@@ -1,11 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 - `urn:toolbox:check:{iri}` refuses an `iri` or `shapes=` that is not an absolute IRI
   (`InvalidArgument`), as `urn:toolbox:input:{iri}` already did. A value with no scheme
   stayed a dot segment in the page's input path: `..` composed `/toolbox/input/..`, which
   the browser resolves to `/toolbox/`, so the page fetched the base as its input.
+- Move to ikigai-core 0.4.0 (scope opacity, structured denials; the cascade, ledger
+  #3893). Bump the minor version because the public API exposes core types.
+- Update ikigai-fn to 0.12.0 and the dev dependencies ikigai-conformance to 0.15.0,
+  ikigai-rdf to 0.6.0, and ikigai-fs to 0.6.0, each on core 0.4.0, so test hosts
+  link one core. The test host's denial is built with `Error::Denied(...into())`.
 
 ## 0.4.0
 

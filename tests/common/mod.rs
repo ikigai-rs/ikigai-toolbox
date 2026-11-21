@@ -103,7 +103,7 @@ impl Host {
         );
         let secret = FnEndpoint::new("test-secret", |inv: &Invocation<'_>| {
             if !inv.capability.allows(SECRET_SCOPE) {
-                return Err(Error::Denied(format!("needs {SECRET_SCOPE}")));
+                return Err(Error::Denied(format!("needs {SECRET_SCOPE}").into()));
             }
             Ok(
                 Representation::new(ReprType::new("text/turtle"), DATA.as_bytes().to_vec())

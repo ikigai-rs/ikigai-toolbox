@@ -1,6 +1,6 @@
 [package]
 name = "ikigai-toolbox"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 # Probed 2026-10-19: 1.86 fails in ikigai-core (`usize::is_multiple_of`, stable in 1.87);
 # 1.87 builds the lib and every test target. The shared CI's msrv job holds it there.
@@ -24,25 +24,29 @@ exclude = ["/vendor", "/dist", "/patches", "/tests", "/web", "/tools", "/build.s
 # The released kernel, the SAME one the hosts use, so a host links one ikigai-core.
 # Core 0.3.0 scopes held content to its deliverer (ledger #2965); principal-less
 # holds belong to root, and ContentStore::put/put_replay are root-only.
-ikigai-core = "0.3.0"
+# core 0.4.0 (scope opacity, structured denials; the cascade, ledger #3893).
+ikigai-core = "0.4.0"
 # The views are ikigai-fn `composeOver` over the page template (named instances,
 # 0.3.1), and `urn:toolbox:text:{text}` is its `echo`. 0.5.0 is the floor for the
 # escaping the page relies on: `$h` per FND-H's rule set, C0 controls to U+FFFD, and
 # an argument spliced into a marker IRI percent-encoded as one segment (ledger #1813).
 # 0.10.0 carries these endpoints onto core 0.3.0 so the host links one core;
 # 0.8's reference arguments are held by tests/references.rs.
-ikigai-fn = "0.10.0"
+# 0.12.0 is ikigai-fn on core 0.4.0 (the cascade, ledger #3893).
+ikigai-fn = "0.12.0"
 # `Endpoint` is an async-trait trait; the file reader implements it for its body path.
 async-trait = "0.1"
 
 [dev-dependencies]
 futures = "0.3"
 # The module recipe as one test (tests/conformance.rs), at the current minor.
-ikigai-conformance = "0.14.0"
+ikigai-conformance = "0.15.0"
 # The manifest's Turtle face: ikigai-rdf's `urn:rdf:transrept` is the transreptor that
 # reaches text/turtle from application/ld+json (ikigai-jsonld's operators are
 # JSON-LD-to-JSON-LD transformations, not transreptors).
-ikigai-rdf = "0.5.0"
+# 0.6.0 is ikigai-rdf on core 0.4.0 (the cascade).
+ikigai-rdf = "0.6.0"
 # The README's host: ikigai-fs's FileEndpoint over a build directory (tests/host.rs).
 # 0.2.2's file Source answers a seekable `Replay` (tests/bodies.rs's large input).
-ikigai-fs = "0.4.0"
+# 0.6.0 is ikigai-fs on core 0.4.0 (the cascade).
+ikigai-fs = "0.6.0"

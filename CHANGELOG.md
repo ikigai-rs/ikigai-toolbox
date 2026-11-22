@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1
+
+- Tighten `TOOLBOX_CSP` to deny unlisted resource types and limit images to the
+  data URI used by the favicon.
+
 ## 0.5.0
 
 - `urn:toolbox:check:{iri}` refuses an `iri` or `shapes=` that is not an absolute IRI

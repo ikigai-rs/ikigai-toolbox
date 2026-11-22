@@ -68,13 +68,13 @@ Then route `/toolbox/{…}` to `urn:toolbox:{…}` by the mechanical rule (path 
 each percent-decoded), with **`TOOLBOX_CSP`** on the route:
 
 ```text
-default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:;
+default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src data:;
 connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none';
 form-action 'none'
 ```
 
-The page has no inline script or style. `'wasm-unsafe-eval'` lets the worker compile the engine,
-and that is all it allows. The CSP is door configuration: no artifact here sets a header.
+The page has no inline script or style. Its favicon uses a data URI, and
+`'wasm-unsafe-eval'` lets the worker compile the engine. The host sets the CSP on the route.
 
 ### Caching
 

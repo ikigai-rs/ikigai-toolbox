@@ -70,21 +70,21 @@ pub const PAGE: &str = "toolbox.html";
 /// The Content-Security-Policy a host puts on its `/toolbox/{…}` routes.
 ///
 /// It is door configuration, never an artifact's (UI conventions D6, D17): the page
-/// has no inline script or style, its favicon is a `data:` URI, and the engine is
-/// WebAssembly compiled in a worker, which is what `'wasm-unsafe-eval'` allows and
-/// all it allows. `connect-src 'self'` is the second fence behind the page's own
-/// same-origin rule for the inputs it fetches.
+/// has no inline script or style, its only image is a `data:` favicon, and the engine
+/// is WebAssembly compiled in a worker, which needs `'wasm-unsafe-eval'`. Unlisted
+/// resource types are blocked by default. `connect-src 'self'` covers the engine
+/// fetch and reinforces the page's same-origin rule for its input fetches.
 ///
 /// ```
 /// assert_eq!(
 ///     ikigai_toolbox::TOOLBOX_CSP,
-///     "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; \
-///      img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; \
+///     "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; \
+///      img-src data:; connect-src 'self'; worker-src 'self'; object-src 'none'; \
 ///      base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
 /// );
 /// ```
-pub const TOOLBOX_CSP: &str = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; \
-style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; \
+pub const TOOLBOX_CSP: &str = "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; \
+style-src 'self'; img-src data:; connect-src 'self'; worker-src 'self'; \
 object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'";
 
 /// The allowlist: every file `urn:toolbox:{name}` may answer, with the media type its
